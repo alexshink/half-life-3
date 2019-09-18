@@ -11,12 +11,18 @@ function is_touch_device() {
   return mq(query);
 };
 
+var info = document.querySelector('.info');
+var infoInner = document.querySelector('.info__inner');
+var windowWidth = window.innerWidth;
+var page = document.body;
+
 window.addEventListener('load', function() {
 
   // append intro block after page loading, 
   var introBlock = document.createElement('div');
   var introAudio = new Audio('resources/audio/valve-theme.wav');
   var introGlitch;
+  var introScrollFix;
 
   introBlock.className = 'intro';
   introBlock.innerHTML = '<img src="resources/intro/intro-1.jpg" class="intro__image">' +
@@ -25,7 +31,7 @@ window.addEventListener('load', function() {
                            '<button type="button" class="button button_sound intro__pause"></button>' +
                            '<button type="button" class="button button_sound intro__close"></button>' +
                          '</div>';
-  document.body.append(introBlock);
+  page.append(introBlock);
 
   var introPlayerButton = document.querySelector('.intro__pause');
   introPlayerButton.addEventListener('click', function() {
@@ -57,13 +63,23 @@ window.addEventListener('load', function() {
         var lang = item.innerText.toLowerCase();
         document.querySelector('.languages__button_active').classList.remove('languages__button_active');
         item.classList.add('languages__button_active');
-        document.body.className = 'page page_' + lang;
+        page.className = 'page page_' + lang;
+        // change info-block height if lang is switched
+        if ( info.className.indexOf('show') >= 0 ) {
+          info.style.height = infoInner.offsetHeight + 'px';
+        };
       };
       // open intro
       if ( item.className.indexOf('open-intro__button') >= 0 ) {
         introBlock.classList.add('intro_show');
         introAudio.loop = true;
         introAudio.play();
+        // set fixed position to body
+        page.dataset.scrollTop = window.scrollY;
+        introScrollFix = setTimeout(function(){
+          page.classList.add('page_intro');
+        }, 3000);
+        // intro glitch
         introGlitch = setInterval(function(){
           introBlock.classList.add('intro_glitch');
           setTimeout(function(){
@@ -73,7 +89,11 @@ window.addEventListener('load', function() {
       };
       // close intro
       if ( item.className.indexOf('intro__close') >= 0 ) {
-        // stop doesn't exist, therefore pause and reset audio-time
+        // disable fixed position on body and scroll to prev pos
+        clearTimeout(introScrollFix);
+        page.classList.remove('page_intro');
+        window.scroll(0, page.dataset.scrollTop);
+        // audio 'stop' doesn't exist (wtf?), therefore pause and reset audio-time
         introAudio.pause();
         introAudio.currentTime = 0;
         clearInterval(introGlitch);
@@ -83,6 +103,18 @@ window.addEventListener('load', function() {
       // stats
       if ( item.className.indexOf('stats') >= 0 ) {
         item.classList.toggle('stats_hidden');
+      };
+      // info
+      if ( item.className.indexOf('open-info__button') >= 0 ) {
+        var infoHeight;
+        if ( info.className.indexOf('show') < 0 ) {
+          infoHeight = info.scrollHeight + 5;
+        } else {
+          infoHeight = 0;
+        };
+        info.style.height = infoHeight + 'px';
+        info.classList.toggle('show');
+        item.classList.toggle('active');
       };
     });
   });
@@ -135,7 +167,7 @@ window.addEventListener('load', function() {
   startButton.addEventListener('click', function(){
     if ( this.className.indexOf('active') >= 0 ) {
       startButton.remove();
-      document.body.classList.remove('page_loading');
+      page.classList.remove('page_loading');
       runHlTimer();
       // fix preload audio for safari ios
       introAudio.volume = 0;
@@ -186,12 +218,12 @@ window.addEventListener('load', function() {
       speedButtonGreenlevel = 128;
       speedButtonDefaultScale = 1.1;
       // die effect
-      document.body.classList.add('page_die');
+      page.classList.add('page_die');
       // reset values for timer and start again
       setTimeout(function() {
         hlTimerSpeed = 1000; // reset timer speed
         hlTimerSeconds = 61; // reset timer count
-        document.body.classList.remove('page_die');
+        page.classList.remove('page_die');
       }, 4500)
     };
 
@@ -274,5 +306,14 @@ window.addEventListener('load', function() {
     document.querySelector('.stats__min').innerHTML = statsTotal.minutes();
     document.querySelector('.stats__sec').innerHTML = statsTotal.seconds();
   }, 1000);
+
+  // hide info on resize
+  window.addEventListener('resize', function() {
+    if ( window.innerWidth != windowWidth ) { // fix for Chrome URL Bar
+      info.style.height = 0;
+      info.classList.remove('show');
+      document.querySelector('.open-info__button').classList.remove('active');
+    };
+  });
 
 });
