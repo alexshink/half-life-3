@@ -100,10 +100,6 @@ window.addEventListener('load', function() {
         introBlock.className = 'intro';
         introPlayerButton.classList.remove('intro__play');
       };
-      // stats
-      if ( item.className.indexOf('stats') >= 0 ) {
-        item.classList.toggle('stats_hidden');
-      };
       // info
       if ( item.className.indexOf('open-info__button') >= 0 ) {
         var infoHeight;

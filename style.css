@@ -417,12 +417,7 @@ html {
 }
 
 .stats {
-  cursor: pointer;
-  transition: opacity .5s;
-}
-
-.stats_hidden {
-  opacity: 0;
+  position: relative;
 }
 
 .stats__inner {
@@ -437,8 +432,20 @@ html {
   border-bottom: 1px solid #fff;
 }
 
-.stats__title {
+.stats__link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
   margin-bottom: 10px;
+}
+
+.stats__link:before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
 }
 
 .stats__date {
